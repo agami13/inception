@@ -1,7 +1,14 @@
-FROM debian:latest
+FROM debian:bullseye
 
-RUN apt update && apt upgrade && apt install -y nginx
+EXPOSE 443
 
-COPY default /etc/nginx/sites-available/.
+RUN apt -y update && apt -y upgrade && apt -y install nginx openssl
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+	-keyout /etc/ssl/private/nginx-selfsigned.key \
+	-out /etc/ssl/certs/nginx-selfsigned.crt \
+	-subj "/C=MO/L=BG/O=42/OU=IT/CN={DOMAIN_NAME}"
+
+COPY tools/default /etc/nginx/sites-available/default
+
+CMD [ "nginx", "-g", "daemon off;" ]

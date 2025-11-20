@@ -1,22 +1,71 @@
-version: "3.8"
-
 services:
   mariadb:
-    build: requirements/mariadb/.
     container_name: mariadb
+    image: mariadb42
+    build: requirements/mariadb/
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - database:/var/lib/mysql
+    networks:
+      - network 
+    init: true
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot-password"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  wordpress:
+    container_name: wordpress
+    image: wordpress42
+    build: requirements/wordpress/
+    restart: always
+    volumes:
+      - website:/var/www/html
+    networks:
+      - network
+    env_file:
+      - .env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    init: true
+
   nginx:
-    build: requirements/nginx/.
     container_name: nginx
-    ports: 
-      - "8080:80"
+    image: nginx42
+    build: requirements/nginx/
+    ports:
+      - "443:443"
+      - "8080:8080"
+    restart: always
+    volumes:
+      - website:/var/www/html
+    env_file:
+      - .env
+    networks:
+      - network
     depends_on:
       - wordpress
-    volumes:
-      - ./web:/var/www/html
-  wordpress:
-    build: requirements/wordpress/.
-    container_name: wp-php
-    volumes:
-      - ./web:/var/www/html
-    depends_on:
-      - mariadb
+    init: true
+
+networks:
+  network:
+    name: network
+    driver: bridge
+
+volumes:
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ybouaoud/data/database 
+      o: bind
+  website:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ybouaoud/data/website
+      o: bind

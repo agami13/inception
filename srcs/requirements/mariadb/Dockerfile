@@ -1,15 +1,11 @@
-FROM debian:latest
+FROM debian:bullseye
 
-RUN apt update && apt upgrade && apt install -y mariadb-server
+EXPOSE 3306
 
-RUN chown -R mysql:mysql /var/lib/mysql
+RUN apt -y update && apt -y upgrade && apt -y install mariadb-server
 
-COPY 50-server.cnf /etc/mysql/mariadb.conf.d/.
+COPY tools/script.sh /bin/script.sh
 
-COPY init.sql /etc/mysql/init.sql
+RUN chmod +x /bin/script.sh
 
-RUN mkdir /run/mysqld
-
-USER mysql
-
-CMD ["mysqld"]
+CMD ["/bin/script.sh"]

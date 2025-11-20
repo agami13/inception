@@ -1,13 +1,11 @@
-FROM debian:latest
+FROM debian:bullseye
 
-RUN apt update && apt install -y php-fpm \
-                                    php-mysqli \
-                                    curl && apt clean
+EXPOSE 9000
 
-COPY www.conf /etc/php/8.4/fpm/pool.d/.
+RUN apt -y update && apt -y upgrade && apt -y install mariadb-server php-fpm php-mysql curl
 
-COPY script.sh .
+COPY tools/script.sh /bin/script.sh
 
-RUN chmod +x script.sh
+RUN chmod +x /bin/script.sh
 
-CMD ["./script.sh"]
+CMD ["/bin/script.sh"]
