@@ -1,36 +1,39 @@
 server {
-	listen 443 ssl;
-	listen [::]:443 ssl;
+    listen 80;
+    listen [::]:80;
+    server_name localhost;
 
-	server_name localhost ybouaoud.42.fr www.ybouaoud.42.fr;
-
-	ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
-	ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-
-	ssl_protocols TLSv1.3;
-
-	index index.php;
-	root /var/www/html;
-
-	location ~ [^/]\\.php(/|$) {
-        try_files $uri =404;
-        fastcgi_pass wordpress:9000;
-        include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }
+    return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
 
-    server_name localhost ybouaoud.42.fr www.ybouaoud.42.fr;
+    server_name localhost;
 
     ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
     ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
     ssl_protocols TLSv1.3;
 
+    root /var/www/html;
+    index index.php index.html index.htm;
 
-    # Optional: Redirect HTTP to HTTPS for port 443
-    error_page 497 https://$host:443$request_uri;
+    # WordPress permalink routing
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # PHP files
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass wordpress:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    # Static assets
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires max;
+        log_not_found off;
+    }
 }

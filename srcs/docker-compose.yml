@@ -39,7 +39,7 @@ services:
     build: requirements/nginx/
     ports:
       - "443:443"
-      - "8080:8080"
+      # - "8080:8080"
     restart: always
     volumes:
       - website:/var/www/html
@@ -61,11 +61,11 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/ybouaoud/data/database 
+      device: /home/jorj/data/database 
       o: bind
   website:
     driver: local
     driver_opts:
       type: none
-      device: /home/ybouaoud/data/website
+      device: /home/jorj/data/website
       o: bind

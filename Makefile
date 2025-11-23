@@ -2,8 +2,9 @@ _SHELLP := /bin/bash
 _DCOMPOSE := docker compose -f srcs/docker-compose.yml
 
 up: build
-	mkdir -p /home/ybouaoud/data
-	mkdir -p /home/ybouaoud/data/database
+	mkdir -p /home/jorj/data
+	mkdir -p /home/jorj/data/database
+	mkdir -p /home/jorj/data/website
 	$(_DCOMPOSE) up -d
 
 build:
@@ -26,7 +27,7 @@ logs_nginx:
 
 clean:
 	$(_DCOMPOSE) down -v --rmi all --remove-orphans
-	sudo rm -rf /home/ybouaoud/data/database/* /home/ybouaoud/data/website/*
+	sudo rm -rf /home/jorj/data/database/* /home/jorj/data/website/*
 
 fclean: clean
 	docker system prune -a -f
@@ -43,4 +44,4 @@ ps:
 	$(_DCOMPOSE) ps
 
 status:
-	$(_DCOMPOSE) status
+	$(_DCOMPOSE) ps
